@@ -52,7 +52,7 @@ public class Controller {
     @FXML
     protected void onNewProjectButtonClicked() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("createProject.fxml"));
-        MessageExchangePoint messageExchangePoint = MessageExchangePoint.getInstance();
+        DataExchange messageExchangePoint = DataExchange.getInstance();
 
         // Scene
         setPopup(new Stage());
@@ -62,6 +62,33 @@ public class Controller {
         popup.getIcons().add(new Image(new FileInputStream("img.png")));
         popup.setResizable(false);
         popup.setScene(fxmlLoader.load());
-        messageExchangePoint.setPopupController(fxmlLoader.getController());
+        messageExchangePoint.setUserInputController(fxmlLoader.getController());
+        popup.showAndWait();
+    }
+
+    @FXML
+    protected void onEditConfigButtonClicked() throws IOException {
+
+        FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("editConfig.fxml"));
+        DataExchange messageExchangePoint = DataExchange.getInstance();
+        if (messageExchangePoint.getUserInputController() != null) {
+            messageExchangePoint.setUserInputController(null);
+        }
+
+        // Scene
+        setPopup(new Stage());
+        popup.initOwner(getPrimaryStage());
+        popup.initModality(Modality.APPLICATION_MODAL);
+        popup.setTitle("Edit Config File");
+        popup.getIcons().add(new Image(new FileInputStream("img.png")));
+        popup.setResizable(false);
+        popup.setScene(fxmlLoader.load());
+        // This comes after load() function. The reason behind of this, if we set the controller before load it the PopupController will store null
+        messageExchangePoint.setUserInputController(fxmlLoader.getController());
+
+        if (openWithFilePath != null) {
+            messageExchangePoint.getUserInputController().configFilePath.setText(openWithFilePath.getAbsolutePath());
+            messageExchangePoint.getUserInputController().extractJson(openWithFilePath);
+        }
         popup.showAndWait();
     }
