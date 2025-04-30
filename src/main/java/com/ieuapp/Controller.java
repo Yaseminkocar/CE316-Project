@@ -92,3 +92,52 @@ public class Controller {
         }
         popup.showAndWait();
     }
+
+    @FXML
+    protected void onCreateConfigButtonClicked() throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("createConfig.fxml"));
+        MessageExchangePoint messageExchangePoint = MessageExchangePoint.getInstance();
+
+        // Scene
+        setPopup(new Stage());
+        popup.initOwner(getPrimaryStage());
+        popup.initModality(Modality.APPLICATION_MODAL);
+        popup.setTitle("Create Configuration File");
+        popup.getIcons().add(new Image(new FileInputStream("img.png")));
+        popup.setResizable(false);
+        popup.setScene(fxmlLoader.load());
+        // This comes after load() function. The reason behind of this, if we set the controller before load it the PopupController will store null
+        messageExchangePoint.setPopupController(fxmlLoader.getController());
+        popup.showAndWait();
+    }
+
+    @FXML
+    protected void onDeleteConfigButtonClicked() throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("deleteConfig.fxml"));
+        MessageExchangePoint messageExchangePoint = MessageExchangePoint.getInstance();
+
+        // Scene
+        setPopup(new Stage());
+        popup.initOwner(getPrimaryStage());
+        popup.initModality(Modality.APPLICATION_MODAL);
+        popup.setTitle("Delete Configuration File");
+        popup.getIcons().add(new Image(new FileInputStream("img.png")));
+        popup.setResizable(false);
+        popup.setScene(fxmlLoader.load());
+        // This comes after load() function. The reason behind of this, if we set the controller before load it the PopupController will store null
+        messageExchangePoint.setPopupController(fxmlLoader.getController());
+        popup.showAndWait();
+    }
+
+    @FXML
+    protected void onCloseButtonClicked() {
+        treeView.setRoot(null);
+        tabPane.getTabs().clear();
+        tableView.getColumns().clear();
+        tableView.getItems().clear();
+    }
+
+    @FXML
+    protected void onQuitButtonClicked() {
+        System.exit(0);
+    }
