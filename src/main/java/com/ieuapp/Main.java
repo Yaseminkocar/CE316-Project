@@ -1,4 +1,4 @@
-package com.ieuapp;
+/*package com.ieuapp;
 
 import javafx.application.Application;
 import javafx.geometry.HPos;
@@ -135,4 +135,5 @@ public class Main extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-}
+} */
+

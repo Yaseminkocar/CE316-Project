@@ -141,3 +141,54 @@ public class Controller {
     protected void onQuitButtonClicked() {
         System.exit(0);
     }
+
+    @FXML
+    protected void closePopUp(){
+        popup.close();// Closes the current active popup
+        MessageExchangePoint messageExchangePoint = MessageExchangePoint.getInstance();
+        messageExchangePoint.setPopupController(null); // To avoid any possible conflict
+    }
+
+    protected void createNewProject(String projectDirectory, String projectName, boolean importConfig, String customConfigName, String language, String directoryThatContainsProjectZips, String configFilePath, String arguments, String expectedOutput) throws IOException {
+        // Create the destination directory if it doesn't exist
+        File createNewProjectDirectory = new File(projectDirectory + "\\" + projectName);
+        if (!createNewProjectDirectory.exists()) {
+            if(createNewProjectDirectory.mkdirs()){
+                _InitialDirectory = createNewProjectDirectory;
+            }
+        }
+
+
+        // If we have already a JSON Config File then we don't need to create one.
+        if (!importConfig) {
+            saveFileToGivenDirectory(createJsonConfiguration(customConfigName,language,arguments,expectedOutput),projectDirectory + "\\" + projectName);
+        }
+        else {
+            File configFile = new File(configFilePath);
+            Path sourcePath = Path.of(configFilePath);
+            Path destinationPath = Path.of(projectDirectory + "\\" + projectName + "\\" + configFile.getName());
+            try {
+                // Perform the copy operation
+                Files.copy(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                System.out.println("Failed to copy file: " + e.getMessage());
+            }
+        }
+
+        File relocateFolderThatContainsZipFiles = new File(directoryThatContainsProjectZips);
+        File[] files = relocateFolderThatContainsZipFiles.listFiles();
+        assert files != null;
+        for (File file: files){
+            boolean renamed = file.renameTo(new File(projectDirectory + "\\" + projectName + "\\" + file.getName()));
+        }
+
+        TreeItem<FileItem> root = new TreeItem<>(new FileItem(createNewProjectDirectory.getAbsoluteFile()));
+        root.setExpanded(true);
+        treeView.setRoot(root);
+
+        populateTreeView(root);// Adding all other Sub-Items to the TreeView
+        addFunctionalityToTreeItems();// Adds the functionality to the TreeItems
+    }
+
+
+
