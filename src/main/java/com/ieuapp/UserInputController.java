@@ -61,16 +61,47 @@ public class UserInputController {
     protected void onCreateButtonClicked() throws IOException {
         if (radioNew.isSelected()) {
             if (checkInputAreas(false)) {
-                MessageExchangePoint messageExchangePoint = MessageExchangePoint.getInstance();
+                DataExchange messageExchangePoint = DataExchange.getInstance();
                 messageExchangePoint.getController().closePopUp();
                 messageExchangePoint.getController().createNewProject(projectDestinationPath.getText(),projectName.getText(),false,configFileName.getText(),languageChoice.getValue().toString(),zipFilePath.getText(),null,projectArguments.getText(),expectedOutput.getText());
             }
         }
         else if (radioImport.isSelected()) {
             if (checkInputAreas(true)) {
-                MessageExchangePoint messageExchangePoint = MessageExchangePoint.getInstance();
+                DataExchange messageExchangePoint = DataExchange.getInstance();
                 messageExchangePoint.getController().createNewProject(projectDestinationPath.getText(),projectName.getText(),true,null,null,zipFilePath.getText(),configFilePath.getText(),null,null);
                 messageExchangePoint.getController().closePopUp();
             }
         }
     }
+    @FXML
+    protected void onCreateButtonClickedNewConfig() throws IOException {
+        if (checkInputAreasForCreateConfigFile()) {
+            DataExchange messageExchangePoint = DataExchange.getInstance();
+            messageExchangePoint.getController()
+                    .saveFileToGivenDirectory(messageExchangePoint.getController()
+                            .createJsonConfiguration(configFileName.getText(),languageChoice.getValue().toString(),projectArguments.getText(),expectedOutput.getText()),destinationPath.getText());
+            messageExchangePoint.getController().closePopUp();
+        }
+        // TODO: Add something in here maybe later
+    }
+
+    @FXML
+    protected void onSaveButtonClicked() throws IOException {
+        if (checkInputAreasForEditConfigFile()) {
+            DataExchange messageExchangePoint = DataExchange.getInstance();
+            messageExchangePoint.getController().editJsonConfiguration(configFilePath.getText(),languageChoice.getValue().toString(),projectArguments.getText(),expectedOutput.getText());
+            messageExchangePoint.getController().closePopUp();
+        }
+    }
+
+    @FXML
+    protected void onDeleteButtonClicked(){
+        if (!configFilePathForDelete.getText().isEmpty()) {
+            File file = new File(configFilePathForDelete.getText());
+            DataExchange messageExchangePoint = DataExchange.getInstance();
+            messageExchangePoint.getController().deleteFileOrDirectory(file);
+            messageExchangePoint.getController().closePopUp();
+        }
+    }
+
