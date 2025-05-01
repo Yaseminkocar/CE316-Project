@@ -24,7 +24,7 @@ public class DataExchange {
     }
 
     public UserInputController getUserInputController() {
-        return userInputControlle;
+        return userInputController;
     }
 
     public void setUserInputController(UserInputController userInputController) {

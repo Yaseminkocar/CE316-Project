@@ -321,4 +321,73 @@ public class Controller {
     }
 
 
+    // Recursive function to populate the TreeView with subfiles and subdirectories
+    private void populateTreeView( TreeItem<FileItem> parentItem) {
+
+        FileItem parentFileItem = parentItem.getValue();
+        File parentFile = parentFileItem.file();
+
+        if (parentFile.isDirectory()) {
+            // List all files and directories within the parent directory
+            File[] files = parentFile.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    FileItem fileItem = new FileItem(file);
+                    TreeItem<FileItem> newItem = new TreeItem<>(fileItem);
+                    parentItem.getChildren().add(newItem);
+                    populateTreeView(newItem); // Recursive call to populate children
+                }
+            }
+        }
+    }
+
+    /*
+    This record is used for keeping the File but when we need to display this
+     object in a TreeItem object we are able to pass the name of the file by
+     overriding toString() method.
+     */
+    record FileItem(File file) {
+
+        @Override
+        public String toString() {
+            return file.getName(); // Display file name in the TreeItem
+        }
+
+
+    }
+    // This ArrayList is used for save file text that will be used after printing in GUI
+    protected ArrayList<String> fileData = new ArrayList<>();
+
+    // Reads the given File and stores all data in a ArrayList
+    // It's return type is boolean it because we are determine are we going to open a new tab or not
+    private boolean readFile(File rFile) {
+
+        fileData.clear(); // To clear all data inside the array
+        String extension;
+        try {
+            extension = rFile.getName().split("\\.")[1]; // Get the extension of the file
+        } catch (IndexOutOfBoundsException e) {
+            System.out.println("Selected path has not an extension!");
+            return false;
+        }
+        if (rFile.isFile() && _acceptedExtensions.contains(extension)) { // Check if the selected path is a File or a Directory
+            try{
+                FileReader fileReader = new FileReader(rFile);
+                Scanner reader = new Scanner(fileReader);
+
+                while (reader.hasNextLine()) // Read each line in the File and add to ArrayList
+                    fileData.add(reader.nextLine()); // Later this data is going to shown on the Tab
+
+                return true;
+
+            } catch (FileNotFoundException e) {
+                System.out.println("File" + rFile.getName() + " could not found");
+                return false;
+            }
+        }
+        else {
+            System.out.println("Selected path is not a File or has not an accepted extension!");
+            return false;
+        }
+    }
 
