@@ -711,3 +711,76 @@ public class Controller {
         return runSourceCode(compileCommand,executeCommand);
     }
 
+    public Student runSourceCode(String[] compilerCommand,String[] executeCommand) {
+
+        Student student = new Student();
+        boolean isCompiled = true;
+        boolean isRan = true;
+        try {
+            if (!Objects.equals(executeCommand[0], "python")) {
+                // Compile the source
+                ProcessBuilder compileProcessBuilder = new ProcessBuilder(compilerCommand);
+                Process compileProcess = compileProcessBuilder.start();
+                compileProcess.waitFor();
+
+                // Check if the compilation was successful
+                if (compileProcess.exitValue() != 0) {
+                    isCompiled = false;
+                }
+            }
+
+            // Run the compiled code
+            ProcessBuilder runProcessBuilder = new ProcessBuilder(executeCommand);
+            Process runProcess = runProcessBuilder.start();
+            runProcess.waitFor();
+
+            // Check if the run was successful
+            if (runProcess.exitValue() != 0) {
+                isRan = false;
+            }
+
+            // Get the output of the run
+            BufferedReader reader1 = new BufferedReader(new InputStreamReader(runProcess.getInputStream()));
+            StringBuilder output = new StringBuilder();
+            String line1;
+            while ((line1 = reader1.readLine()) != null) {
+                output.append(line1).append("\n");
+            }
+            student.setCompiled(isCompiled);
+            student.setRan(isRan);
+            student.setOutput(output.toString());
+
+
+            return student;
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected void unZipFile(File zipFile) throws IOException {
+        String destinationDir = zipFile.getParent() + File.separator + zipFile.getName().replaceAll("\\.zip$", "");
+        byte[] buffer = new byte[1024];
+
+        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile))) {
+            ZipEntry zipEntry = zis.getNextEntry();
+            while (zipEntry != null) {
+                String fileName = zipEntry.getName();
+                File newFile = new File(destinationDir + File.separator + fileName);
+
+                // Create directories if necessary
+                boolean isDirectoryCreated = new File(newFile.getParent()).mkdirs();
+
+                try (FileOutputStream fos = new FileOutputStream(newFile)) {
+                    int len;
+                    while ((len = zis.read(buffer)) > 0) {
+                        fos.write(buffer, 0, len);
+                    }
+                }
+                zipEntry = zis.getNextEntry();
+            }
+            zis.closeEntry();
+        }
+        boolean deleted = zipFile.delete();
+        refreshTreeView();
+    }
+
