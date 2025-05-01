@@ -41,3 +41,36 @@ public class UserInputController {
     public Button configFilePathEditButton;
     public TextField configFilePathForDelete;
     public Button configFilePathDeleteButton;
+
+    @FXML
+    protected void onRadioButtonClicked(ActionEvent event){
+        if (event.getSource().equals(radioNew)) {
+            radioNew.setSelected(true);
+            radioImport.setSelected(false);
+            importConfigInfo.setVisible(false);
+            newConfigInfo.setVisible(true);
+        }
+        else {
+            radioImport.setSelected(true);
+            radioNew.setSelected(false);
+            newConfigInfo.setVisible(false);
+            importConfigInfo.setVisible(true);
+        }
+    }
+    @FXML
+    protected void onCreateButtonClicked() throws IOException {
+        if (radioNew.isSelected()) {
+            if (checkInputAreas(false)) {
+                MessageExchangePoint messageExchangePoint = MessageExchangePoint.getInstance();
+                messageExchangePoint.getController().closePopUp();
+                messageExchangePoint.getController().createNewProject(projectDestinationPath.getText(),projectName.getText(),false,configFileName.getText(),languageChoice.getValue().toString(),zipFilePath.getText(),null,projectArguments.getText(),expectedOutput.getText());
+            }
+        }
+        else if (radioImport.isSelected()) {
+            if (checkInputAreas(true)) {
+                MessageExchangePoint messageExchangePoint = MessageExchangePoint.getInstance();
+                messageExchangePoint.getController().createNewProject(projectDestinationPath.getText(),projectName.getText(),true,null,null,zipFilePath.getText(),configFilePath.getText(),null,null);
+                messageExchangePoint.getController().closePopUp();
+            }
+        }
+    }
