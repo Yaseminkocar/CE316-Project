@@ -512,6 +512,61 @@ public class Controller {
         boolean relocated = relocateJSONFile.renameTo(new File(destinationPath, relocateJSONFile.getName()));
 
     }
+    protected ArrayList<Student> queryStudents(String filePath) throws Exception {
+        File configFile = new File(getJsonFilePath(filePath));
+        String configFilePath = configFile.getAbsolutePath();
+        ArrayList<Student> students = new ArrayList<>();
+
+        File directory =new File(filePath);
+        File[] files = directory.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    File[] sourceFiles = file.listFiles();
+
+                    assert sourceFiles != null;
+                    for(File sourceFile: sourceFiles){
+                        if (sourceFile.getName().endsWith(".java")){
+                            Student student = javaRun(configFilePath,sourceFile.getAbsolutePath());
+                            student.setId(file.getName());
+                            students.add(student);
+                        }else if (sourceFile.getName().endsWith(".c")){
+                            Student student = cRun(configFilePath,sourceFile.getAbsolutePath());
+                            student.setId(file.getName());
+                            students.add(student);
+                        }else if (sourceFile.getName().endsWith(".py")){
+                            Student student = pythonRun(configFilePath,sourceFile.getAbsolutePath());
+                            student.setId(file.getName());
+                            students.add(student);
+                        } else if (sourceFile.getName().endsWith(".cpp")) {
+                            Student student = cppRun(configFilePath,sourceFile.getAbsolutePath());
+                            student.setId(file.getName());
+                            students.add(student);
+                        }
+                    }
+                }
+            }
+        }
+        return students;
+    }
+
+    protected void writeToCSV(FileWriter writer, String studentId, boolean result){
+        try  {
+            // Write CSV records
+            writer.append(studentId);
+            writer.append(",");
+            if (result)
+                writer.append("Match");
+            else
+                writer.append("MisMatch");
+            writer.append("\n");
+
+            writer.flush();
+
+        } catch (IOException e) {
+            System.err.println("Error writing CSV file: " + e.getMessage());
+        }
+    }
 
     
 
