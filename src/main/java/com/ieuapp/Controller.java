@@ -627,5 +627,87 @@ public class Controller {
 
     }
 
-    
+    public Student cRun(String configFilePath, String sourceFile){
+        File cFile = new File(sourceFile);
+        String fileName = cFile.getName();
+        JSONObject compilerConfig = null;
+        JSONObject projectConfig = null;
+        try {
+            compilerConfig = getObject(configFilePath,"compilerConfig");
+            projectConfig = getObject(configFilePath,"projectConfig");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+
+        String substring = fileName.substring(0, fileName.length() - 2);
+        String[] compileCommand = {compilerConfig.getString("compileCommand"),sourceFile,"-o", cFile.getParent() + "\\" + substring};
+        JSONArray arguments = projectConfig.getJSONArray("argument");
+        String[] executeCommand = new String[arguments.length()+1];
+        executeCommand[0] = cFile.getParent() + "\\" + substring;
+        for (int i = 0; i < arguments.length(); i++) {
+            executeCommand[i+1] = arguments.getString(i);
+        }
+
+        return runSourceCode(compileCommand,executeCommand);
+
+    }
+
+    public Student pythonRun(String configFilePath, String sourceFile){
+        //python -m py_compile
+        JSONObject compilerConfig = null;
+        JSONObject projectConfig = null;
+        try {
+            compilerConfig = getObject(configFilePath,"compilerConfig");
+            projectConfig = getObject(configFilePath,"projectConfig");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        JSONArray arguments = projectConfig.getJSONArray("argument");
+
+        String[] compileCommand = {compilerConfig.getString("compileCommand")};
+        String[] executeCommand = new String[arguments.length()+2];
+        executeCommand[0] = compilerConfig.getString("runCommand");
+        executeCommand[1] = sourceFile;
+        for (int i = 0; i < arguments.length(); i++) {
+            executeCommand[i+2] = arguments.getString(i);
+        }
+
+        return runSourceCode(compileCommand,executeCommand);
+
+
+    }
+    public Student cppRun(String configFilePath, String sourceFile){
+        File cppFile = new File(sourceFile);
+        String fileName = cppFile.getName();
+        JSONObject compilerConfig;
+        JSONObject projectConfig;
+
+        try {
+            compilerConfig = getObject(configFilePath, "compilerConfig");
+            projectConfig = getObject(configFilePath, "projectConfig");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        // Extract the base name (without path) and remove .cpp extension
+        String executableName = fileName.substring(0, fileName.length() - 4);
+
+        String[] compileCommand = {
+                compilerConfig.getString("compileCommand"),
+                sourceFile,
+                "-o",
+                cppFile.getParent() + "\\" + executableName
+        };
+
+        JSONArray arguments = projectConfig.getJSONArray("argument");
+        String[] executeCommand = new String[arguments.length() + 1];
+        executeCommand[0] = cppFile.getParent() + "\\" + executableName;
+        for (int i = 0; i < arguments.length(); i++) {
+            executeCommand[i + 1] = arguments.getString(i);
+        }
+
+        return runSourceCode(compileCommand,executeCommand);
+    }
 
