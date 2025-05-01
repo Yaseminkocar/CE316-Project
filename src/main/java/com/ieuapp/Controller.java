@@ -391,3 +391,127 @@ public class Controller {
         }
     }
 
+    private void openTabWithFileData(String tabHeader) {
+
+
+        TextArea textArea = new TextArea();
+        textArea.setEditable(false); // We don't want the TextArea be editable
+        for (String row: fileData)
+            textArea.appendText(row + "\n");
+
+        Tab newTab = new Tab(tabHeader,textArea);
+        tabPane.getTabs().add(newTab);
+    }
+
+    protected File createJsonConfiguration(String customFileName, String language, String arguments, String expectedOutput) throws IOException {
+        String compileCommand;
+        String runCommand;
+
+        if ("Java".equalsIgnoreCase(language)) {
+            compileCommand = "javac";
+            runCommand = "java";
+        } else if ("C".equalsIgnoreCase(language)) {
+            compileCommand = "gcc";
+            runCommand = "";
+        } else if ("Python".equalsIgnoreCase(language)) {
+            compileCommand = "";
+            runCommand = "python";
+        } else if ("C++".equalsIgnoreCase(language)) {
+            compileCommand = "g++";
+            runCommand = "";
+        } else {
+            compileCommand = "";
+            runCommand = "";
+        }
+
+
+        String json = "{\n" +
+                "    \"compilerConfig\": {\n" +
+                "        \"language\": \"" + language + "\",\n" +
+                "        \"compileCommand\": \"" + compileCommand + "\",\n" +
+                "        \"runCommand\": \"" + runCommand + "\"\n" +
+                "    },\n" +
+                "    \"projectConfig\": {\n" +
+                "        \"argument\": [" ;
+
+        String[] argArray = arguments.split(",");
+        if (!Objects.equals(argArray[0], "")) {
+            for (String argument : argArray) {
+                json += "\n           \"" + argument + "\",";
+            }
+            json = json.substring(0,json.length()-1);
+        }
+        json += "\n        ],\n        \"expectedOutput\": \"" + expectedOutput + "\"\n" +
+                "    }\n" +
+                "}";
+
+        // Replace with the path where you want to save the config file
+        String configFilePath = customFileName + ".json";
+        File configFile = new File(configFilePath);
+        try (FileWriter writer = new FileWriter(configFile)) {
+            writer.write(json);
+        }
+
+        return configFile;
+    }
+
+    protected void deleteFileOrDirectory(File file){
+        boolean deleted = file.delete();
+        refreshTreeView();
+    }
+
+    @FXML
+    protected void editJsonConfiguration(String configFilePath, String language, String arguments, String expectedOutput) throws IOException {
+        String compCommand = "";
+        String runCommand = "";
+
+        JSONObject compilerConfig = new JSONObject();
+        compilerConfig.put("language", language);
+
+        if (language.equals("Java")){
+            compCommand = "javac";
+            runCommand = "java";
+        } else if (language.equals("C")) {
+            compCommand = "gcc";
+            runCommand = "";
+        } else if (language.equals("Python")) {
+            compCommand = "";
+            runCommand = "python";
+        } else if (language.equals("C++")) {
+            compCommand = "g++";
+            runCommand = "";
+        }
+        compilerConfig.put("compileCommand", compCommand);
+        compilerConfig.put("runCommand", runCommand);
+
+        // Create the projectConfig object
+        JSONObject projectConfig = new JSONObject();
+
+        JSONArray jsonArray = new JSONArray();
+        String[] values = arguments.split(",");
+
+        for (String value : values) {
+            jsonArray.put(value.trim()); // Trim to remove leading/trailing spaces
+        }
+
+        projectConfig.put("argument", jsonArray);
+        projectConfig.put("expectedOutput", expectedOutput);
+
+        JSONObject json = new JSONObject();
+        json.put("compilerConfig", compilerConfig);
+        json.put("projectConfig", projectConfig);
+
+        // Format the JSON string for better readability
+        String formattedJson = json.toString(4); // Indent with 4 spaces
+
+        Files.write(Paths.get(configFilePath), formattedJson.getBytes());
+    }
+
+    protected void saveFileToGivenDirectory(File file, String destinationPath){
+        File relocateJSONFile = new File(file.getAbsolutePath());
+        boolean relocated = relocateJSONFile.renameTo(new File(destinationPath, relocateJSONFile.getName()));
+
+    }
+
+    
+
