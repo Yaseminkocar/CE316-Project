@@ -341,18 +341,12 @@ public class Controller {
         }
     }
 
-    /*
-    This record is used for keeping the File but when we need to display this
-     object in a TreeItem object we are able to pass the name of the file by
-     overriding toString() method.
-     */
     record FileItem(File file) {
 
         @Override
         public String toString() {
-            return file.getName(); // Display file name in the TreeItem
+            return file.getName();
         }
-
 
     }
     // This ArrayList is used for save file text that will be used after printing in GUI
@@ -922,7 +916,7 @@ public class Controller {
     }
     @FXML
     protected void onAboutClicked() {
-        String contentText = "- Harun Onur\n- Ege Deniz Yasar\n- Ali Boztepe\n- Oguz Kaan Tavur" +
+        String contentText = "- Emiray Durmaz\n- Betül Sinem Çetiner \n- Yasemin Güler Koçar \n- Meltem Demir" +
                 "\n\nThis application is in development in the scope of CE 316 - Programming Paradigms as the  course project.";
         showAlert(Alert.AlertType.INFORMATION, "About", "Software Development Team", contentText);
     }
