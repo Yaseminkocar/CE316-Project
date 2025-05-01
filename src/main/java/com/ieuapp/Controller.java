@@ -567,6 +567,65 @@ public class Controller {
             System.err.println("Error writing CSV file: " + e.getMessage());
         }
     }
+    protected void checkOutputsOfStudents(String projectPath) throws IOException {
+        String configOfProject = getJsonFilePath(projectPath);
+        JSONObject projectConfig = getObject(configOfProject, "projectConfig");
+        String expOutput = projectConfig.getString("expectedOutput");
+        String pathOfCSV = projectPath + "/StudentResults.csv";
+        FileWriter writer = new FileWriter(pathOfCSV);
+
+        try {
+            ArrayList<Student> studentList = queryStudents(projectPath);
+            for (Student student: studentList) {
+                if (student.getOutput().equals(expOutput)) //student.getOutput().trim().equals(expOutput.trim())
+                    student.setResult(true);
+                else
+                    student.setResult(false);
+
+                writeToCSV(writer, student.getId(),student.getResult());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public JSONObject getObject(String configFilePath,String objectName) throws IOException {
+
+        String jsonText = new String(Files.readAllBytes(Path.of(configFilePath)));
+        JSONObject json = new JSONObject(jsonText);
+        return json.getJSONObject(objectName);
+    }
+
+    public Student javaRun(String configFilePath, String sourceFile){
+
+        JSONObject compilerConfig = null;
+        JSONObject projectConfig = null;
+
+        try {
+            compilerConfig = getObject(configFilePath,"compilerConfig");
+            projectConfig = getObject(configFilePath,"projectConfig");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        String jCompile = compilerConfig.getString("compileCommand");
+        String runCommand = compilerConfig.getString("runCommand");
+
+        String[] compileCommand = {jCompile,sourceFile};
+
+
+        JSONArray arguments = projectConfig.getJSONArray("argument");
+
+        String[] executeCommand = new String[arguments.length()+2];
+        executeCommand[0] = runCommand;
+        executeCommand[1] = sourceFile;
+        for (int i = 0; i < arguments.length(); i++) {
+            executeCommand[i+2] = arguments.getString(i);
+        }
+
+        return runSourceCode(compileCommand,executeCommand);
+
+
+    }
 
     
 
