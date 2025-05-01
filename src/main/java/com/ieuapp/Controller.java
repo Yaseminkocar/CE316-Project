@@ -190,5 +190,34 @@ public class Controller {
         addFunctionalityToTreeItems();// Adds the functionality to the TreeItems
     }
 
+    @FXML
+    protected void onOpenButtonClicked(){
+        DirectoryChooser directoryChooser = new DirectoryChooser(); // To chose only Directories
+        directoryChooser.setTitle("Choose Project Directory");
+        directoryChooser.setInitialDirectory(new File(Paths.get("").toAbsolutePath() + "/ProjectFiles")); // Initial Path
+        File selectedDirectory = directoryChooser.showDialog(new Popup()); // Popup is used to show Dialog
+        if (selectedDirectory == null)// Check if any directory is selected
+            return;
+        _InitialDirectory = selectedDirectory.getAbsoluteFile(); // To store selected root directory
+
+        tableView.getColumns().clear();
+        tableView.getItems().clear();
+
+        TreeItem<FileItem> root = new TreeItem<>(new FileItem(selectedDirectory.getAbsoluteFile()));
+        root.setExpanded(true);
+        treeView.setRoot(root);
+
+        populateTreeView(root);// Adding all other Sub-Items to the TreeView
+
+        addFunctionalityToTreeItems();// Adds the functionality to the TreeItems
+
+    }
+
+    @FXML
+    protected void onExportConfigButtonClicked() throws IOException {
+        Desktop desktop = Desktop.getDesktop();
+        desktop.open(new File(Paths.get("").toAbsolutePath() + "/ConfigFiles"));
+    }
+
 
 
