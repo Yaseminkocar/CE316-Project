@@ -105,3 +105,57 @@ public class UserInputController {
         }
     }
 
+    private boolean checkInputAreas(boolean importConfig) {
+        if (importConfig) {
+            return !projectName.getText().isEmpty() && !configFilePath.getText().isEmpty() && !projectDestinationPath.getText().isEmpty() && !zipFilePath.getText().isEmpty();
+        }
+        else return !projectName.getText().isEmpty() && !projectDestinationPath.getText().isEmpty() && !expectedOutput.getText().isEmpty() && !zipFilePath.getText().isEmpty();
+    }
+
+    private boolean checkInputAreasForCreateConfigFile() {
+        return !configFileName.getText().isEmpty() && !expectedOutput.getText().isEmpty() && !destinationPath.getText().isEmpty();
+    }
+
+    private boolean checkInputAreasForEditConfigFile() {
+        return !configFilePath.getText().isEmpty() && !expectedOutput.getText().isEmpty();
+    }
+    @FXML
+    protected void onExploreButtonClicked(ActionEvent event){
+        if (event.getSource() == configFilePathButton) {
+            File file = get_JSONFilePath();
+            if (file != null) {
+                configFilePath.setText(file.getAbsolutePath());
+            }
+            else System.out.println("File not found!");
+        } else if (event.getSource() == projectDestinationPathButton) {
+            File file = get_InitialDirectory("/ProjectFiles");
+            if (file != null) {
+                projectDestinationPath.setText(file.getAbsolutePath());
+            }
+            else System.out.println("File not found!");
+        } else if (event.getSource() == zipFilePathButton) {
+            File file = get_InitialDirectory("");
+            if (file != null) {
+                zipFilePath.setText(file.getAbsolutePath());
+            }
+            else System.out.println("File not found!");
+        }
+        else if (event.getSource() == destinationPathButton) {
+            File file = get_InitialDirectory("/ConfigFiles");
+            if (file != null) {
+                destinationPath.setText(file.getAbsolutePath());
+            } else System.out.println("File not found!");
+        } else if (event.getSource() == configFilePathEditButton) {
+            File file = get_JSONFilePath();
+            if (file != null) {
+                configFilePath.setText(file.getAbsolutePath());
+                extractJson(file);
+            }
+            else System.out.println("File not found!");
+        } else if (event.getSource() == configFilePathDeleteButton) {
+            File file = get_JSONFilePath();
+            if (file != null) { configFilePathForDelete.setText(file.getAbsolutePath());
+            } else System.out.println("File not found!");
+        }
+
+    }
