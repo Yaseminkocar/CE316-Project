@@ -900,7 +900,7 @@ public class Controller {
     public void showPopupWithContent(String content) throws FileNotFoundException {
         Stage popupStage = new Stage();
         popupStage.setTitle("User Manual");
-        popupStage.getIcons().add(new Image(new FileInputStream("img.png")));
+      //  popupStage.getIcons().add(new Image(new FileInputStream("img.png")));
 
         TextArea textArea = new TextArea(content);
         textArea.setWrapText(true);
