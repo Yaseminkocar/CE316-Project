@@ -874,4 +874,81 @@ public class Controller {
             else return null;
         }
     }
+    protected void refreshTreeView(){
+        if (_InitialDirectory == null)
+            return;
+        TreeItem<FileItem> root = new TreeItem<>(new FileItem(_InitialDirectory));
+        root.setExpanded(true);
+        treeView.setRoot(root);
+
+        populateTreeView(root);// Adding all other Sub-Items to the TreeView
+        addFunctionalityToTreeItems();// Adds the functionality to the TreeItems
+
+    }
+
+    @FXML
+    protected void onUserManualClicked() {
+        String filePath = "UserManual.txt";
+
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(filePath), "UTF-8"))) {
+            String line;
+            StringBuilder content = new StringBuilder();
+            while ((line = br.readLine()) != null) {
+                content.append(line).append("\n");
+            }
+            showPopupWithContent(content.toString());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+    public void showPopupWithContent(String content) throws FileNotFoundException {
+        Stage popupStage = new Stage();
+        popupStage.setTitle("User Manual");
+        popupStage.getIcons().add(new Image(new FileInputStream("img.png")));
+
+        TextArea textArea = new TextArea(content);
+        textArea.setWrapText(true);
+        textArea.setEditable(false);
+
+        ScrollPane scrollPane = new ScrollPane(textArea);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setFitToHeight(true);
+
+        Scene scene = new Scene(scrollPane, 750, 600);
+        popupStage.setScene(scene);
+        popupStage.show();
+    }
+    @FXML
+    protected void onAboutClicked() {
+        String contentText = "- Harun Onur\n- Ege Deniz Yasar\n- Ali Boztepe\n- Oguz Kaan Tavur" +
+                "\n\nThis application is in development in the scope of CE 316 - Programming Paradigms as the  course project.";
+        showAlert(Alert.AlertType.INFORMATION, "About", "Software Development Team", contentText);
+    }
+
+    protected void showAlert(Alert.AlertType alertType, String title, String headerText, String contentText){
+
+        Alert alert = new Alert(alertType);
+        alert.setTitle(title);
+        alert.setHeaderText(headerText);
+        alert.setContentText(contentText);
+        alert.showAndWait();
+    }
+
+    public Stage getPopup() {
+        return popup;
+    }
+    public void setPopup(Stage popup) {
+        this.popup = popup;
+    }
+
+    public Stage getPrimaryStage() {
+        return primaryStage;
+    }
+
+    public void setPrimaryStage(Stage primaryStage) {
+        this.primaryStage = primaryStage;
+    }
+}
 
