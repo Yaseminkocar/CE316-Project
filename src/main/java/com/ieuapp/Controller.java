@@ -107,7 +107,7 @@ public class Controller {
         popup.setResizable(false);
         popup.setScene(fxmlLoader.load());
         // This comes after load() function. The reason behind of this, if we set the controller before load it the PopupController will store null
-        messageExchangePoint.setPopupController(fxmlLoader.getController());
+        messageExchangePoint.setUserInputController(fxmlLoader.getController());
         popup.showAndWait();
     }
 
@@ -125,7 +125,7 @@ public class Controller {
         popup.setResizable(false);
         popup.setScene(fxmlLoader.load());
         // This comes after load() function. The reason behind of this, if we set the controller before load it the PopupController will store null
-        messageExchangePoint.setPopupController(fxmlLoader.getController());
+        messageExchangePoint.setUserInputController(fxmlLoader.getController());
         popup.showAndWait();
     }
 
@@ -146,7 +146,7 @@ public class Controller {
     protected void closePopUp(){
         popup.close();// Closes the current active popup
         MessageExchangePoint messageExchangePoint = MessageExchangePoint.getInstance();
-        messageExchangePoint.setPopupController(null); // To avoid any possible conflict
+        messageExchangePoint.setUserInputController(null); // To avoid any possible conflict
     }
 
     protected void createNewProject(String projectDirectory, String projectName, boolean importConfig, String customConfigName, String language, String directoryThatContainsProjectZips, String configFilePath, String arguments, String expectedOutput) throws IOException {
@@ -217,6 +217,107 @@ public class Controller {
     protected void onExportConfigButtonClicked() throws IOException {
         Desktop desktop = Desktop.getDesktop();
         desktop.open(new File(Paths.get("").toAbsolutePath() + "/ConfigFiles"));
+    }
+    @FXML
+    protected void onCheckButtonClicked() throws IOException {
+        if (treeView == null)
+            return;
+        if (_InitialDirectory == null) {
+            showAlert(Alert.AlertType.WARNING, "Warning", "Project Not Selected", "Please open or create a project before check.");
+            return;
+        }
+        checkOutputsOfStudents(_InitialDirectory.getAbsolutePath());
+        String csvFilePath = _InitialDirectory.getAbsolutePath() + "/StudentResults.csv";
+
+        tableView.getItems().clear();
+        tableView.getColumns().clear();
+        TableColumn<Student, String> idColumn = new TableColumn<>("Student ID");
+        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+
+        TableColumn<Student, Boolean> resultColumn = new TableColumn<>("Result");
+        resultColumn.setCellValueFactory(new PropertyValueFactory<>("result"));
+        resultColumn.setCellFactory(column -> new TextFieldTableCell<>() {
+            @Override
+            public void updateItem(Boolean item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item ? "✔" : "❌");
+                }
+            }
+        });
+
+        tableView.getColumns().addAll(idColumn, resultColumn);
+
+        try (BufferedReader br = new BufferedReader(new FileReader(csvFilePath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length >= 2) {
+                    boolean result = (parts[1].equals("Match"));
+                    tableView.getItems().add(new Student(parts[0], result));
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        refreshTreeView();
+    }
+
+    // ContextMenu that will contain options
+    private ContextMenu treeViewContextMenu;
+    private void addFunctionalityToTreeItems(){
+
+        // Other functionalities like is clicked element is a file or folder, handled in redFile() function
+        // TODO: Selected Files shouldn't be able to open at multiple tabs
+        treeView.setOnMouseClicked(event -> {
+
+            if (treeViewContextMenu != null) {
+                treeViewContextMenu.hide();
+            }
+
+            // Define the regex pattern to match content inside single quotes
+            Pattern pattern = Pattern.compile("'null'");
+
+            // Create a matcher object
+            Matcher matcher = pattern.matcher(event.getTarget().toString());
+
+            if (matcher.find()) {
+                treeView.getSelectionModel().clearSelection();
+                return;
+            }
+
+            // To detect double-click on TreeView
+            if (event.getClickCount() == 2 && event.getButton() == MouseButton.PRIMARY) {
+                TreeItem<FileItem> selectedItem = treeView.getSelectionModel().getSelectedItem();
+                if (selectedItem != null && selectedItem.getValue() != null) {
+                    if (readFile(selectedItem.getValue().file()))
+                        openTabWithFileData(selectedItem.getValue().toString());
+                }
+            }
+
+            if (event.getButton() == MouseButton.SECONDARY) {
+
+                TreeItem<FileItem> selectedItem = treeView.getSelectionModel().getSelectedItem();
+                if (selectedItem != null && selectedItem.getValue().file().isFile()){
+                    ContextMenu contextMenu = contextMenuBuilder(selectedItem.getValue().toString().split("\\.")[1],selectedItem.getValue().file().isFile(),selectedItem);
+                    if (contextMenu == null) {
+                        return;
+                    }
+                    treeViewContextMenu = contextMenu;
+                    contextMenu.show(treeView, event.getScreenX(), event.getScreenY());
+                } else if (selectedItem != null && !selectedItem.getValue().file().isFile()) {
+                    ContextMenu contextMenu = contextMenuBuilder(null,selectedItem.getValue().file().isFile(),selectedItem);
+                    if (contextMenu == null) {
+                        return;
+                    }
+                    treeViewContextMenu = contextMenu;
+                    contextMenu.show(treeView, event.getScreenX(), event.getScreenY());
+                }
+            }
+        });
     }
 
 
