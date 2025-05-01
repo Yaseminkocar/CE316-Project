@@ -96,7 +96,7 @@ public class Controller {
     @FXML
     protected void onCreateConfigButtonClicked() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("createConfig.fxml"));
-        MessageExchangePoint messageExchangePoint = MessageExchangePoint.getInstance();
+        DataExchange messageExchangePoint = DataExchange.getInstance();
 
         // Scene
         setPopup(new Stage());
@@ -114,7 +114,7 @@ public class Controller {
     @FXML
     protected void onDeleteConfigButtonClicked() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("deleteConfig.fxml"));
-        MessageExchangePoint messageExchangePoint = MessageExchangePoint.getInstance();
+        DataExchange messageExchangePoint = DataExchange.getInstance();
 
         // Scene
         setPopup(new Stage());
@@ -145,7 +145,7 @@ public class Controller {
     @FXML
     protected void closePopUp(){
         popup.close();// Closes the current active popup
-        MessageExchangePoint messageExchangePoint = MessageExchangePoint.getInstance();
+        DataExchange messageExchangePoint = DataExchange.getInstance();
         messageExchangePoint.setUserInputController(null); // To avoid any possible conflict
     }
 
@@ -782,5 +782,96 @@ public class Controller {
         }
         boolean deleted = zipFile.delete();
         refreshTreeView();
+    }
+    protected String getJsonFilePath(String dirPath) throws IOException {
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(dirPath))) {
+            for (Path path : stream) {
+                if (path.toString().endsWith(".json")) {
+                    return path.toString();
+                }
+            }
+        }
+        return null;
+    }
+
+    public File newFile(File destinationDir, ZipEntry zipEntry) throws IOException {
+        File destFile = new File(destinationDir, zipEntry.getName());
+
+        String destDirPath = destinationDir.getCanonicalPath();
+        String destFilePath = destFile.getCanonicalPath();
+
+        if (!destFilePath.startsWith(destDirPath + File.separator)) {
+            throw new IOException("Entry is outside of the target dir: " + zipEntry.getName());
+        }
+
+        return destFile;
+    }
+
+    private ContextMenu contextMenuBuilder(String fileExtension, boolean isFile, TreeItem<FileItem> selectedItem){
+
+        if (isFile) {
+            ContextMenu contextMenu = new ContextMenu();
+            MenuItem openMenuItem = new MenuItem("Open");
+            openMenuItem.setOnAction(event1 -> {
+                if (readFile(selectedItem.getValue().file()))
+                    openTabWithFileData(selectedItem.getValue().toString());
+            });
+            MenuItem deleteMenuItem = new MenuItem("Delete");
+            deleteMenuItem.setOnAction(event1 -> {
+                deleteFileOrDirectory(selectedItem.getValue().file());
+            });
+            MenuItem editMenuItem = new MenuItem("Edit");
+            editMenuItem.setOnAction(event1 -> {
+                try {
+                    openWithFilePath = selectedItem.getValue().file();
+                    onEditConfigButtonClicked();
+                    openWithFilePath = null;
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            MenuItem unzipMenuItem = new MenuItem("Unzip");
+            unzipMenuItem.setOnAction(event1 -> {
+
+                try {
+                    unZipFile(selectedItem.getValue().file());
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+
+            if (fileExtension.equalsIgnoreCase("json")) {
+                contextMenu.getItems().addAll(openMenuItem, editMenuItem, deleteMenuItem);
+            } else if (fileExtension.equalsIgnoreCase("zip")) {
+                contextMenu.getItems().addAll(unzipMenuItem, deleteMenuItem);
+            } else {
+                contextMenu.getItems().addAll(openMenuItem, deleteMenuItem);
+            }
+            return contextMenu;
+        }
+        else {
+            if (selectedItem.getValue().file().getAbsoluteFile().toString().equals(_InitialDirectory.getAbsoluteFile().toString())) {
+                ContextMenu contextMenu = new ContextMenu();
+                MenuItem unzipMenuItem = new MenuItem("Unzip All");
+                unzipMenuItem.setOnAction(event1 -> {
+                    try {
+                        FileFilter filter = f -> f.getName().endsWith("zip");
+
+                        File[] subZipFiles = selectedItem.getValue().file().listFiles(filter);
+                        if (subZipFiles == null) {
+                            return;
+                        }
+                        for (File zip: subZipFiles) {
+                            unZipFile(zip);
+                        }
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+                contextMenu.getItems().add(unzipMenuItem);
+                return contextMenu;
+            }
+            else return null;
+        }
     }
 
