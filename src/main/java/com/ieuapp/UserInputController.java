@@ -83,7 +83,7 @@ public class UserInputController {
                             .createJsonConfiguration(configFileName.getText(),languageChoice.getValue().toString(),projectArguments.getText(),expectedOutput.getText()),destinationPath.getText());
             messageExchangePoint.getController().closePopUp();
         }
-        // TODO: Add something in here maybe later
+
     }
 
     @FXML
@@ -159,3 +159,63 @@ public class UserInputController {
         }
 
     }
+    private File get_InitialDirectory(String folderName) {
+        DirectoryChooser directoryChooser = new DirectoryChooser(); // To chose only Directories
+        directoryChooser.setTitle("Choose Directory");
+        // Initial Path
+        directoryChooser.setInitialDirectory(new File(Paths.get("").toAbsolutePath() + folderName));
+        return directoryChooser.showDialog(new Popup());
+    }
+
+    private File get_JSONFilePath() {
+        FileChooser fileChooser = new FileChooser(); // To chose only Directories
+        fileChooser.setTitle("Choose Configuration File");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JSON Files", "*.json"));
+        fileChooser.setInitialDirectory(new File(Paths.get("").toAbsolutePath() + "/ConfigFiles")); // Initial Path
+        return fileChooser.showOpenDialog(new Popup());
+    }
+
+    private File get_ZipDirectory() {
+        FileChooser fileChooser = new FileChooser(); // To chose only Directories
+        fileChooser.setTitle("Choose Zip File");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Zip Files", "*.zip"));
+        return fileChooser.showOpenDialog(new Popup());
+    }
+
+    protected void extractJson(File file){
+        if (configFilePath.getText().isEmpty()){
+            return;
+        }
+
+        String jsonText ;
+        try {
+            jsonText = new String(Files.readAllBytes(Paths.get(file.getPath())));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        JSONObject jsonObject = new JSONObject(jsonText);
+
+        JSONObject compilerConfig = jsonObject.getJSONObject("compilerConfig");
+        String language = compilerConfig.getString("language");
+        String compileCommand = compilerConfig.getString("compileCommand");
+        String rCommand = compilerConfig.getString("runCommand");
+
+        JSONObject projectConfig = jsonObject.getJSONObject("projectConfig");
+        JSONArray arguments = projectConfig.getJSONArray("argument");
+        String expectedOut = projectConfig.getString("expectedOutput");
+
+        String argumentsToStr = "";
+        for (int i = 0; i < arguments.length(); i++) {
+            argumentsToStr += arguments.getString(i);
+            if (i != arguments.length()-1)
+                argumentsToStr+=",";
+        }
+
+        editConfigVBox.setVisible(true);
+        languageChoice.setValue(language);
+        projectArguments.setText(argumentsToStr);
+        expectedOutput.setText(expectedOut);
+
+    }
+}
