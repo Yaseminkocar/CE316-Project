@@ -13,6 +13,8 @@ import java.io.IOException;
 public class Main extends Application {
     @Override
     public void start(Stage stage) throws IOException {
+
+
         DataExchange messageExchangePoint = DataExchange.getInstance();
         Controller controller = new Controller();
         File file = new File("img.png");
@@ -21,7 +23,7 @@ public class Main extends Application {
         FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("dashboard.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 1200, 750);
         messageExchangePoint.setController(fxmlLoader.getController());
-        stage.setTitle("EDE App");
+        stage.setTitle("İEU App");
         stage.getIcons().add(new Image(new FileInputStream(file.getAbsolutePath())));
         stage.setScene(scene);
         stage.show();
