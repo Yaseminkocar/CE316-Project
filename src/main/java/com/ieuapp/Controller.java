@@ -59,7 +59,7 @@ public class Controller {
         popup.initOwner(getPrimaryStage());
         popup.initModality(Modality.APPLICATION_MODAL);
         popup.setTitle("New Project");
-        popup.getIcons().add(new Image(new FileInputStream("img.png")));
+      //  popup.getIcons().add(new Image(new FileInputStream("img.png")));
         popup.setResizable(false);
         popup.setScene(fxmlLoader.load());
         messageExchangePoint.setUserInputController(fxmlLoader.getController());
@@ -80,7 +80,7 @@ public class Controller {
         popup.initOwner(getPrimaryStage());
         popup.initModality(Modality.APPLICATION_MODAL);
         popup.setTitle("Edit Config File");
-        popup.getIcons().add(new Image(new FileInputStream("img.png")));
+    //    popup.getIcons().add(new Image(new FileInputStream("img.png")));
         popup.setResizable(false);
         popup.setScene(fxmlLoader.load());
         // This comes after load() function. The reason behind of this, if we set the controller before load it the PopupController will store null
@@ -103,7 +103,7 @@ public class Controller {
         popup.initOwner(getPrimaryStage());
         popup.initModality(Modality.APPLICATION_MODAL);
         popup.setTitle("Create Configuration File");
-        popup.getIcons().add(new Image(new FileInputStream("img.png")));
+     //   popup.getIcons().add(new Image(new FileInputStream("img.png")));
         popup.setResizable(false);
         popup.setScene(fxmlLoader.load());
         // This comes after load() function. The reason behind of this, if we set the controller before load it the PopupController will store null
@@ -121,7 +121,7 @@ public class Controller {
         popup.initOwner(getPrimaryStage());
         popup.initModality(Modality.APPLICATION_MODAL);
         popup.setTitle("Delete Configuration File");
-        popup.getIcons().add(new Image(new FileInputStream("img.png")));
+   //     popup.getIcons().add(new Image(new FileInputStream("img.png")));
         popup.setResizable(false);
         popup.setScene(fxmlLoader.load());
         // This comes after load() function. The reason behind of this, if we set the controller before load it the PopupController will store null
